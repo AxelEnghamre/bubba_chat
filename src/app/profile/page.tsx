@@ -1,5 +1,6 @@
 "use client";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import { redirect } from "next/navigation";
 
 const Profile = () => {
@@ -15,7 +16,12 @@ const Profile = () => {
       <div className="flex flex-col gap-3">
         <p className="text-lg">Name: {session?.user?.name}</p>
         <p className="text-lg">Email: {session?.user?.email}</p>
-        <img src={session?.user?.image} alt="Profile Image" />
+        <Image
+          src={session?.user?.image ?? ""}
+          alt="Profile Image"
+          width={200}
+          height={200}
+        />
       </div>
     </div>
   );
