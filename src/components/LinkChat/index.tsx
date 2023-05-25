@@ -10,8 +10,10 @@ const LinkChat = ({
   imgUrl: string;
 }) => {
   return (
-    <Link href={`chat/${chatId}`}>
-      <a className="text-white">{name}</a>
+    <Link href={`chat/${chatId}`} className="text-white">
+      {name}
     </Link>
   );
 };
+
+export default LinkChat;

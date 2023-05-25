@@ -2,7 +2,7 @@
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
-import LinkChat from "src/components/LinkChat";
+import LinkChat from "@/components/LinkChat";
 
 const Chat = () => {
   const { data: session } = useSession();
