@@ -25,8 +25,9 @@ const authOptions: NextAuthOptions = {
           ...session.user,
           id: token.id,
           userData: {
-            userName: data?.user_name,
-            userDescription: data?.user_description,
+            userId: data?.id,
+            userName: data?.name,
+            userDescription: data?.description,
           },
         },
       };
