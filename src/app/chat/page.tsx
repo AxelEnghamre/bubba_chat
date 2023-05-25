@@ -39,6 +39,15 @@ const Chat = () => {
       }),
     });
   };
+  const fetchMessages = async (chatId: string) => {
+    const res = await fetch("api/fetchMessages", {
+      method: "POST",
+      body: JSON.stringify({
+        chatId,
+        userId: session.user.userData.userId,
+      }),
+    });
+  };
 
   return (
     <>
@@ -70,6 +79,10 @@ const Chat = () => {
               <button onClick={() => sendMessage("2", messageValue)}>
                 {" "}
                 Send Message{" "}
+              </button>
+              <button onClick={() => fetchMessages("2")}>
+                {" "}
+                fetch messages{" "}
               </button>
             </section>
           </>
