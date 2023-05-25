@@ -12,9 +12,9 @@ const POST = async (request: Request) => {
   const { data, error } = await supabase
     .from("chats")
     .select()
-    .eq("user_one", userId);
+    .or(`user_one.eq.${userId},user_two.eq.${userId}`);
 
-    console.log(data);
+  console.log(data);
 
   const j = JSON.stringify({ chats: ["hej"] });
   return NextResponse.json(j);
