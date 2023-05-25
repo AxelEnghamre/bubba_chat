@@ -14,9 +14,11 @@ const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async session({ session, token }) {
-      const {data} = await supabase.from("users").select().eq("email",session.user?.email).single();
-
-      console.log("hej session")
+      const { data } = await supabase
+        .from("users")
+        .select()
+        .eq("email", session.user?.email)
+        .single();
       return {
         ...session,
         user: {
@@ -24,8 +26,7 @@ const authOptions: NextAuthOptions = {
           id: token.id,
           userData: {
             userName: data?.user_name,
-            userDescription: data?.user_description
-
+            userDescription: data?.user_description,
           },
         },
       };
