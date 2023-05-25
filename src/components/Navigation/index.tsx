@@ -1,13 +1,12 @@
 "use client";
-import { useSession } from "next-auth/react";
-import { signIn, signOut } from "next-auth/react";
+import { signIn, signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 
 const Navigation = () => {
   const { data: session } = useSession();
   console.log(session);
   return (
-    <nav className=" fixed inset-0 w-screen h-24 flex gap-3 bg-slate-400 text-white justify-center items-center">
+    <nav className=" fixed inset-0 flex h-fit w-screen items-center justify-center gap-3 bg-slate-400 text-white">
       <Link href="/"> Home </Link>
       {session?.user ? (
         <>
