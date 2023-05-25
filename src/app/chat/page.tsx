@@ -6,6 +6,7 @@ import { useState } from "react";
 const Chat = () => {
   const { data: session } = useSession();
   const [userTwoIdValue, setUserTwoIdValue] = useState("");
+  const [messageValue, setMessageValue] = useState("");
   if (!session?.user) {
     redirect("/");
   }
@@ -25,6 +26,25 @@ const Chat = () => {
       body: JSON.stringify({
         userOne: session.user.userData.userId,
         userTwo: userTwoId,
+      }),
+    });
+  };
+  const sendMessage = async (chatId: string, message: string) => {
+    const res = await fetch("api/sendMessage", {
+      method: "POST",
+      body: JSON.stringify({
+        chatId,
+        message,
+        userId: session.user.userData.userId,
+      }),
+    });
+  };
+  const fetchMessages = async (chatId: string) => {
+    const res = await fetch("api/fetchMessages", {
+      method: "POST",
+      body: JSON.stringify({
+        chatId,
+        userId: session.user.userData.userId,
       }),
     });
   };
@@ -49,6 +69,20 @@ const Chat = () => {
               <button onClick={() => createChat(userTwoIdValue)}>
                 {" "}
                 Create Chat{" "}
+              </button>
+              <input
+                className="text-black"
+                type="text"
+                onChange={(e) => setMessageValue(e.target.value)}
+                value={messageValue}
+              />
+              <button onClick={() => sendMessage("2", messageValue)}>
+                {" "}
+                Send Message{" "}
+              </button>
+              <button onClick={() => fetchMessages("2")}>
+                {" "}
+                fetch messages{" "}
               </button>
             </section>
           </>
