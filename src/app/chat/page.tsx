@@ -3,12 +3,17 @@ import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 import LinkChat from "@/components/LinkChat";
-
+type Chat = {
+  chatId: string;
+  name: string;
+}
 const Chat = () => {
   const { data: session } = useSession();
   const [userTwoIdValue, setUserTwoIdValue] = useState("");
   const [messageValue, setMessageValue] = useState("");
-  const [chats, setChats] = useState([]);
+  const [chats, setChats] = useState<Chat[]>([]); 
+  const [name , setName] = useState<string>(""); 
+
   if (!session?.user) {
     redirect("/");
   }
@@ -24,7 +29,13 @@ const Chat = () => {
     });
     const data = await res.json();
     if (data) {
-      setChats(data.chats);
+      const filteredChats = data.chats.filter(
+        (chat) =>
+          chat.user_one === session.user.userData.userId ||
+          chat.user_two === session.user.userData.userId 
+      );
+      setChats(filteredChats);
+      console.log(filteredChats);
     }
   };
   const createChat = async (userTwoId: string) => {
@@ -36,6 +47,7 @@ const Chat = () => {
       }),
     });
   };
+  
   const sendMessage = async (chatId: string, message: string) => {
     const res = await fetch("api/sendMessage", {
       method: "POST",
@@ -55,6 +67,8 @@ const Chat = () => {
       }),
     });
   };
+  
+  
 
   return (
     <>
@@ -89,14 +103,20 @@ const Chat = () => {
           </section>
           <section>
             <h2>Chats</h2>
-            {chats.map((chat) => (
-              <LinkChat
-                key={chat.chatId}
-                chatId={chat.chatId}
-                name={chat.name}
-                imgUrl={chat.imgUrl}
-              />
-            ))}
+            <div key={crypto.randomUUID()}>
+  {chats.map((chat) => {
+    console.log("chat");
+    console.log(chat); // log the chat object to the console
+    return (
+      <LinkChat
+        key={crypto.randomUUID()}
+        chatId={chat.id}
+        name={chat.name}
+        imgUrl={chat.image}
+      />
+    );
+  })}
+</div>
           </section>
         </>
       </main>
