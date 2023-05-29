@@ -1,18 +1,20 @@
 "use client";
+import LinkChat from "@/components/LinkChat";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
-import LinkChat from "@/components/LinkChat";
 type Chat = {
+  id: string;
+  image: string;
   chatId: string;
   name: string;
-}
+};
 const Chat = () => {
   const { data: session } = useSession();
   const [userTwoIdValue, setUserTwoIdValue] = useState("");
   const [messageValue, setMessageValue] = useState("");
-  const [chats, setChats] = useState<Chat[]>([]); 
-  const [name , setName] = useState<string>(""); 
+  const [chats, setChats] = useState<Chat[]>([]);
+  const [name, setName] = useState<string>("");
 
   if (!session?.user) {
     redirect("/");
@@ -21,7 +23,6 @@ const Chat = () => {
   useEffect(() => {
     fetchChats();
   }, []);
-
   const fetchChats = async () => {
     const res = await fetch("api/chats", {
       method: "POST",
@@ -32,7 +33,7 @@ const Chat = () => {
       const filteredChats = data.chats.filter(
         (chat) =>
           chat.user_one === session.user.userData.userId ||
-          chat.user_two === session.user.userData.userId 
+          chat.user_two === session.user.userData.userId
       );
       setChats(filteredChats);
       console.log(filteredChats);
@@ -47,7 +48,7 @@ const Chat = () => {
       }),
     });
   };
-  
+
   const sendMessage = async (chatId: string, message: string) => {
     const res = await fetch("api/sendMessage", {
       method: "POST",
@@ -67,8 +68,6 @@ const Chat = () => {
       }),
     });
   };
-  
-  
 
   return (
     <>
@@ -104,19 +103,19 @@ const Chat = () => {
           <section>
             <h2>Chats</h2>
             <div key={crypto.randomUUID()}>
-  {chats.map((chat) => {
-    console.log("chat");
-    console.log(chat); // log the chat object to the console
-    return (
-      <LinkChat
-        key={crypto.randomUUID()}
-        chatId={chat.id}
-        name={chat.name}
-        imgUrl={chat.image}
-      />
-    );
-  })}
-</div>
+              {chats.map((chat) => {
+                console.log("chat");
+                console.log(chat); // log the chat object to the console
+                return (
+                  <LinkChat
+                    key={crypto.randomUUID()}
+                    chatId={chat.id}
+                    name={chat.name}
+                    imgUrl={chat.image}
+                  />
+                );
+              })}
+            </div>
           </section>
         </>
       </main>
