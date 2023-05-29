@@ -97,7 +97,6 @@ const Chat = () => {
       }),
     });
   };
-
   return (
     <>
       <main>
