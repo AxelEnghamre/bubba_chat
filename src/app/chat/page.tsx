@@ -8,13 +8,13 @@ type Chat = {
   image: string;
   chatId: string;
   name: string;
+  otherUserName: string;
 };
 const Chat = () => {
   const { data: session } = useSession();
   const [userTwoIdValue, setUserTwoIdValue] = useState("");
   const [messageValue, setMessageValue] = useState("");
   const [chats, setChats] = useState<Chat[]>([]);
-  const [name, setName] = useState<string>("");
 
   if (!session?.user) {
     redirect("/");
@@ -23,6 +23,19 @@ const Chat = () => {
   useEffect(() => {
     fetchChats();
   }, []);
+
+  const fetchUser = async (userId: string) => {
+    const res = await fetch("api/fetchUser", {
+      method: "POST",
+      body: JSON.stringify({ userId }),
+    });
+    const data = await res.json();
+    if (data) {
+      console.log(data);
+    }
+    return data;
+  };
+
   const fetchChats = async () => {
     const res = await fetch("api/chats", {
       method: "POST",
@@ -35,8 +48,24 @@ const Chat = () => {
           chat.user_one === session.user.userData.userId ||
           chat.user_two === session.user.userData.userId
       );
-      setChats(filteredChats);
-      console.log(filteredChats);
+      const chatsWithUserData = await Promise.all(
+        filteredChats.map(async (chat) => {
+          const otherUserId =
+            chat.user_one === session.user.userData.userId
+              ? chat.user_two
+              : chat.user_one;
+          console.log("otherUserId");
+          console.log(otherUserId);
+          const otherUser = await fetchUser(otherUserId);
+          console.log("otherUser");
+          console.log(otherUser.name);
+          return {
+            ...chat,
+            otherUserName: otherUser[0]?.name ?? "Unknown User",
+          };
+        })
+      );
+      setChats(chatsWithUserData);
     }
   };
   const createChat = async (userTwoId: string) => {
@@ -105,12 +134,12 @@ const Chat = () => {
             <div key={crypto.randomUUID()}>
               {chats.map((chat) => {
                 console.log("chat");
-                console.log(chat); // log the chat object to the console
+                console.log(chat);
                 return (
                   <LinkChat
                     key={crypto.randomUUID()}
                     chatId={chat.id}
-                    name={chat.name}
+                    name={chat.otherUserName}
                     imgUrl={chat.image}
                   />
                 );
