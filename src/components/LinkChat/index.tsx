@@ -12,6 +12,8 @@ const LinkChat = ({
   return (
     <Link className="flex items-center space-x-2" href={`chat/${chatId}`}>
       {name}
+      {chatId}
+      <img src={imgUrl} alt="profile picture" />
     </Link>
   );
 };
