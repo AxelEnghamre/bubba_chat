@@ -33,7 +33,7 @@ const Chat = () => {
         name: string | null;
       }[] = await response.json();
 
-      if(data.length > 0) {
+      if (data.length > 0) {
         return data[0];
       }
     }
@@ -48,29 +48,33 @@ const Chat = () => {
     event.preventDefault();
     const otherUser = await fetchUserWithEmail(chatWithEmail);
 
-    if(otherUser) {
-      createChat(session?.user.userData.userId,otherUser.id);
+    if (otherUser) {
+      createChat(session?.user.userData.userId, otherUser.id);
     }
   };
 
   return (
-    <>
+    <section className="flex h-screen flex-col items-center justify-center gap-3">
+      <h1 className="text-2xl font-bold">Add a friend!👋</h1>
       <form
         onSubmit={handleSubmit}
-        className="flex h-12 w-1/2 flex-row justify-between gap-2"
+        className="flex h-12 w-1/2 flex-row items-center justify-between gap-2"
       >
         <input
           type="email"
           value={chatWithEmail}
           onChange={handleChange}
-          className="h-full grow text-gray-500"
+          className="h-full grow rounded-md bg-zinc-900 p-2 text-lg text-gray-500 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-600 focus:ring-opacity-50"
           placeholder="Email.to@your.friend"
         />
-        <button type="submit" className="h-full w-20 bg-slate-600 ">
+        <button
+          type="submit"
+          className="text-md bg-rose😴-600 h-full rounded-md p-2 font-bold tracking-wider text-white transition-colors duration-300 hover:bg-rose-700"
+        >
           Create Chat
         </button>
       </form>
-    </>
+    </section>
   );
 };
 
