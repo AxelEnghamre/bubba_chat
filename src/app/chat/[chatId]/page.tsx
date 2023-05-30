@@ -115,8 +115,9 @@ const Bubba = ({ params }: { params: { chatId: string } }) => {
           { event: "*", schema: "public", table: "messages" },
           (payload) => {
             console.log("Change received!", payload);
-            if (payload.new.chat_id === params.chatId) {
+            if (payload.new && payload.new.chat_id === params.chatId) {
               fetchMessages();
+              console.log("inside if");
             }
           }
         )
