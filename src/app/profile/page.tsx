@@ -11,7 +11,7 @@ const Profile = () => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center">
+    <div className="flex h-screen flex-col items-center justify-center gap-3">
       <h1 className="text-2xl font-bold">Profile</h1>
       <div className="flex flex-col gap-3">
         <p className="text-lg">Name: {session?.user?.name}</p>
