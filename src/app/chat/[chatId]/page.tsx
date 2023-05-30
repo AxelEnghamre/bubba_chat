@@ -1,8 +1,10 @@
 "use client";
 import supabase from "@/lib/supabaseStore";
+import { AnimatePresence, motion } from "framer-motion";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import { redirect } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type ChatRow = {
   id: string;
@@ -10,11 +12,13 @@ type ChatRow = {
   user_one: string;
   user_two: string;
 };
+
 type ChatAuthorization = {
   success: boolean;
   chat?: ChatRow;
   error?: string;
 };
+
 const Bubba = ({ params }: { params: { chatId: string } }) => {
   const { data: session } = useSession();
   const [chatRow, setChatRow] = useState<ChatRow>();
@@ -22,6 +26,9 @@ const Bubba = ({ params }: { params: { chatId: string } }) => {
   const [otherUserName, setOtherUserName] = useState<string>("");
   const [currentUserName, setCurrentUserName] = useState<string>("");
   const [messageValue, setMessageValue] = useState("");
+  const [CurrentUserImageUrl, setCurrentUserImageUrl] = useState<string>("");
+  const [OtherUserImageUrl, setOtherUserImageUrl] = useState<string>("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   if (!session?.user) {
     redirect("/");
@@ -66,6 +73,10 @@ const Bubba = ({ params }: { params: { chatId: string } }) => {
   };
 
   const sendMessage = async () => {
+    if (!messageValue.trim()) {
+      return;
+    }
+
     const res = await fetch("../../api/sendMessage", {
       method: "POST",
       body: JSON.stringify({
@@ -74,10 +85,13 @@ const Bubba = ({ params }: { params: { chatId: string } }) => {
         message: messageValue,
       }),
     });
+
     const data = await res.json();
     if (data) {
       console.log(data);
     }
+
+    setMessageValue("");
     return data;
   };
 
@@ -140,60 +154,122 @@ const Bubba = ({ params }: { params: { chatId: string } }) => {
     ).then((data) => {
       if (data) {
         setOtherUserName(data[0].name);
+        setOtherUserImageUrl(data[0].image_url);
       }
     });
     fetchUser(session.user.userData.userId).then((data) => {
       if (data) {
         setCurrentUserName(data[0].name);
+        setCurrentUserImageUrl(data[0].image_url);
       }
     });
   }, [chatRow]);
+
+  useEffect(() => {
+    // Send message if enter is pressed
+    const handleKeyDown = (e) => {
+      if (e.key === "Enter") {
+        sendMessage();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [messageValue]);
+
+  useEffect(() => {
+    // Scroll to the bottom of the messages when they update
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({
+        behavior: "auto",
+        block: "end",
+        inline: "nearest",
+      });
+    }
+  }, [messages]);
 
   console.log("messages", messages);
   console.log("chatRow", chatRow);
   console.log("otherUserName", otherUserName);
 
   return (
-    <main>
-      {JSON.stringify({
+    <main className="flex h-screen w-full flex-1 flex-col  text-center">
+      {/* {JSON.stringify({
         chatRow,
-      })}
-      <div className="flex flex-col">
-        {messages.map((message) => (
-          <div key={message.id} className="flex flex-col">
-            <div
-              className={`${
-                message.user_id === session.user.userData.userId
-                  ? "bg-green-500"
-                  : "bg-red-500"
-              } text-md font-bold`}
+      })} */}
+      <AnimatePresence>
+        <div className="mt-4 flex flex-1 flex-col overflow-y-scroll px-4 py-2">
+          {messages.map((message) => (
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.3,
+                type: "spring",
+                bounce: 0.25,
+                stiffness: 500,
+                damping: 30,
+              }}
+              key={message.id}
+              className="my-2 flex flex-col"
             >
-              {
+              <div
+                className={`
+              ${
                 message.user_id === session.user.userData.userId
-                  ? currentUserName // Display the current user's name if the message was sent by them
-                  : otherUserName // Display the other user's name if the message was sent by them
-              }
-            </div>
-            <div
-              className={`${
-                message.user_id === session.user.userData.userId
-                  ? "bg-green-500"
-                  : "bg-red-500"
-              }`}
-            >
-              {message.message}
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className="flex flex-col">
+              } text-md flex flex-row items-center text-white
+              `}
+              >
+                <Image
+                  className="rounded-full"
+                  src={
+                    message.user_id === session.user.userData.userId
+                      ? CurrentUserImageUrl
+                      : OtherUserImageUrl
+                  }
+                  alt="user image"
+                  width={40}
+                  height={40}
+                />
+                <div className="ml-2 flex flex-col">
+                  <div className="flex flex-row items-center text-sm font-bold text-white text-zinc-100">
+                    {message.user_id === session.user.userData.userId
+                      ? currentUserName
+                      : otherUserName}
+                  </div>
+                  <div
+                    className={`${
+                      message.user_id === session.user.userData.userId
+                    }
+              text-md flex flex-row items-center text-zinc-200
+              `}
+                  >
+                    {message.message}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+
+          <div ref={messagesEndRef} />
+        </div>
+      </AnimatePresence>
+
+      <div className="sticky bottom-0 flex w-full flex-row items-center justify-center bg-zinc-800 px-8 py-4">
         <input
-          className="rounded-md border-2 border-black text-black"
+          id="message-input"
+          className="w-full rounded-md border-2 border-black px-4 py-2 text-black"
           type="text"
           value={messageValue}
           onChange={(e) => setMessageValue(e.target.value)}
         />
-        <button onClick={sendMessage}>Send</button>
+        <button
+          className="text-md ml-2 rounded-md bg-zinc-700 px-2 px-4 py-2 font-bold text-white transition duration-200 ease-in-out hover:bg-violet-500"
+          onClick={sendMessage}
+        >
+          Send
+        </button>
       </div>
     </main>
   );

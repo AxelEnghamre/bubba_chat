@@ -1,4 +1,5 @@
 "use client";
+import { Reorder } from "framer-motion";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -100,46 +101,72 @@ const ChatLayout = ({ children }: { children: React.ReactNode }) => {
       setChats(chatsWithUsers);
     });
   }, []);
+  //log chat order
+  useEffect(() => {
+    console.log(chats);
+  }, [chats]);
 
   return (
-    <main className="mt-20 grid h-fit w-screen grid-cols-5">
-      <section className="col-span-1 col-start-1">
+    <main className="grid h-screen w-screen grid-cols-6 bg-zinc-800">
+      <section className="col-span-1 col-start-1 overflow-y-hidden bg-zinc-900 pt-8">
         <Link href={"/chat"}>
           <h2 className="cursor-pointer text-center text-2xl font-bold tracking-wider transition-colors duration-300 hover:underline">
             {" "}
             Chats{" "}
           </h2>
         </Link>
-        {chats.map((chat) => (
-          <div
-            key={crypto.randomUUID()}
-            className="mt-2 flex cursor-pointer items-center gap-2 rounded-lg bg-zinc-900 p-2 shadow-md transition-colors hover:bg-zinc-700"
-          >
-            <Image
-              src={
-                session.user.userData.userId !== chat.user_one
-                  ? chat.user_data_one?.image_url
-                  : chat.user_data_two?.image_url
-              }
-              alt="user image"
-              width={30}
-              height={30}
-              style={{ borderRadius: "50%" }}
-            />
+        <Reorder.Group
+          axis="y"
+          className="mt-4 flex h-screen flex-col gap-2 overflow-y-auto px-2"
+          values={chats.map((chat) => chat.id)}
+          onReorder={(values) => {
+            setChats((chats) => {
+              const chatsCopy = [...chats];
+              const newChats = values.map((value) =>
+                chatsCopy.find((chat) => chat.id === value)
+              );
+              return newChats as Chat[];
+            });
+          }}
+        >
+          {chats.map((chat) => (
+            <Reorder.Item
+              transition={{ type: "spring", stiffness: 700, damping: 30 }}
+              layout
+              dragConstraints={{ top: 0, bottom: 0 }}
+              dragElastic={1}
+              value={chat.id}
+              key={chat.id} // Use chat.id as the key
+              className="mt-2 flex cursor-pointer items-center gap-2 rounded-lg bg-zinc-900 p-2 shadow-md transition-colors hover:bg-rose-500 hover:text-zinc-900"
+            >
+              <Image
+                src={
+                  session.user.userData.userId !== chat.user_one
+                    ? chat.user_data_one?.image_url
+                    : chat.user_data_two?.image_url
+                }
+                alt="user image"
+                width={30}
+                height={30}
+                style={{ borderRadius: "50%" }}
+              />
 
-            <LinkChat
-              key={crypto.randomUUID()}
-              chatId={String(chat.id)}
-              userOne={chat.user_data_one}
-              userOneId={chat.user_one}
-              userTwo={chat.user_data_two}
-              userTwoId={chat.user_two}
-              currentUserId={session.user.userData.userId}
-            />
-          </div>
-        ))}
+              <LinkChat
+                key={crypto.randomUUID()}
+                chatId={String(chat.id)}
+                userOne={chat.user_data_one}
+                userOneId={chat.user_one}
+                userTwo={chat.user_data_two}
+                userTwoId={chat.user_two}
+                currentUserId={session.user.userData.userId}
+              />
+            </Reorder.Item>
+          ))}
+        </Reorder.Group>
       </section>
-      <section className="col-span-4 col-start-2">{children}</section>
+      <section className="col-span-5 col-start-2 overflow-y-hidden">
+        {children}
+      </section>
     </main>
   );
 };

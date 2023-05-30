@@ -1,13 +1,11 @@
 "use client";
 import { useSession } from "next-auth/react";
-import { signIn, signOut } from "next-auth/react";
-import { redirect } from "next/navigation";
 
 const HomePage = () => {
   const { data: session } = useSession();
   return (
     <>
-      <main>
+      {/* <main>
         <h1>Bubba</h1>
 
         {session?.user ? (
@@ -19,6 +17,24 @@ const HomePage = () => {
           </>
         ) : (
           <p>Bubba Chat is a nice chat application</p>
+        )}
+      </main> */}
+      <main className="flex h-screen flex-col items-center justify-center gap-3 bg-zinc-900">
+        {session?.user ? (
+          <>
+            <h1 className="text-2xl font-bold">
+              Hello {session.user.name}! 👋
+            </h1>
+            <h2 className="text-lg">What are you waiting for? Add a friend!</h2>
+            <h3 className="text-sm">
+              psst... press chat to start chatting with your friends! 🤫
+            </h3>
+          </>
+        ) : (
+          <>
+            <h1 className="text-2xl font-bold">Welcome to Bubba Chat! 👋</h1>
+            <p className="text-lg">Bubba Chat is a nice chat application</p>
+          </>
         )}
       </main>
     </>
