@@ -109,7 +109,7 @@ const Bubba = ({ params }: { params: { chatId: string } }) => {
     // Subscribe to changes in the table
     const subscribeToChanges = () => {
       const subscription = supabase
-        .channel(params.chatId)
+        .channel(`chat_${params.chatId}`)
         .on(
           "postgres_changes",
           { event: "*", schema: "public", table: "messages" },
