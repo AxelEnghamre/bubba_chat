@@ -1,5 +1,6 @@
 "use client";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -104,21 +105,40 @@ const ChatLayout = ({ children }: { children: React.ReactNode }) => {
     <main className="mt-20 grid h-fit w-screen grid-cols-5">
       <section className="col-span-1 col-start-1">
         <Link href={"/chat"}>
-          <h2>Chats</h2>
+          <h2 className="cursor-pointer text-center text-2xl font-bold tracking-wider transition-colors duration-300 hover:underline">
+            {" "}
+            Chats{" "}
+          </h2>
         </Link>
         {chats.map((chat) => (
-          <LinkChat
+          <div
             key={crypto.randomUUID()}
-            chatId={String(chat.id)}
-            userOne={chat.user_data_one}
-            userOneId={chat.user_one}
-            userTwo={chat.user_data_two}
-            userTwoId={chat.user_two}
-            currentUserId={session.user.userData.userId}
-          />
+            className="mt-2 flex cursor-pointer items-center gap-2 rounded-lg bg-zinc-900 p-2 shadow-md transition-colors hover:bg-zinc-700"
+          >
+            <Image
+              src={
+                session.user.userData.userId !== chat.user_one
+                  ? chat.user_data_one?.image_url
+                  : chat.user_data_two?.image_url
+              }
+              alt="user image"
+              width={30}
+              height={30}
+              style={{ borderRadius: "50%" }}
+            />
+
+            <LinkChat
+              key={crypto.randomUUID()}
+              chatId={String(chat.id)}
+              userOne={chat.user_data_one}
+              userOneId={chat.user_one}
+              userTwo={chat.user_data_two}
+              userTwoId={chat.user_two}
+              currentUserId={session.user.userData.userId}
+            />
+          </div>
         ))}
       </section>
-
       <section className="col-span-4 col-start-2">{children}</section>
     </main>
   );
