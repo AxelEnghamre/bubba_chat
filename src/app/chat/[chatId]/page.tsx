@@ -115,8 +115,9 @@ const Bubba = ({ params }: { params: { chatId: string } }) => {
           { event: "*", schema: "public", table: "messages" },
           (payload) => {
             console.log("Change received!", payload);
-            // Update the messages state with the latest data
-            fetchMessages();
+            if (payload.new.chat_id === params.chatId) {
+              fetchMessages();
+            }
           }
         )
         .subscribe();
