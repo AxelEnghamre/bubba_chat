@@ -11,7 +11,6 @@ const Navigation = () => {
       {session?.user ? (
         <>
           <button onClick={() => signOut()}>Logout</button>
-          <Link href="/contacts"> Contacts </Link>
           <Link href="/chat"> Chat </Link>
           <Link href="/profile"> Profile </Link>
         </>
