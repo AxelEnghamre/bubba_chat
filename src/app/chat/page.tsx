@@ -69,7 +69,7 @@ const Chat = () => {
         />
         <button
           type="submit"
-          className="text-md bg-rose😴-600 h-full rounded-md p-2 font-bold tracking-wider text-white transition-colors duration-300 hover:bg-rose-700"
+          className="text-md h-full rounded-md bg-rose-600 p-2 font-bold tracking-wider text-white transition-colors duration-300 hover:bg-rose-700"
         >
           Create Chat
         </button>
