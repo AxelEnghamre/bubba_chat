@@ -13,6 +13,22 @@ const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
+    async signIn({ user, account, profile, email, credentials }) {
+      console.log("signIn", user, account, profile, email, credentials);
+      const { data: users, error } = await supabase
+        .from("users")
+        .insert([
+          {
+            email: user?.email,
+            name: user?.name,
+            image_url: user?.image,
+            description: "This is a description",
+          },
+        ]);
+        console.log("users", users);
+        console.log("error", error);
+      return true;
+    },
     async session({ session, token }) {
       const { data } = await supabase
         .from("users")
