@@ -1,152 +1,75 @@
 "use client";
-import LinkChat from "@/components/LinkChat";
 import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
-import { useEffect, useState } from "react";
-type Chat = {
-  id: string;
-  image: string;
-  chatId: string;
-  name: string;
-  otherUserName: string;
-};
+import { useState } from "react";
+
 const Chat = () => {
   const { data: session } = useSession();
-  const [userTwoIdValue, setUserTwoIdValue] = useState("");
-  const [messageValue, setMessageValue] = useState("");
-  const [chats, setChats] = useState<Chat[]>([]);
+  const [chatWithEmail, setChatWithEmail] = useState("");
 
-  if (!session?.user) {
-    redirect("/");
-  }
-
-  useEffect(() => {
-    fetchChats();
-  }, []);
-
-  const fetchUser = async (userId: string) => {
-    const res = await fetch("api/fetchUser", {
-      method: "POST",
-      body: JSON.stringify({ userId }),
-    });
-    const data = await res.json();
-    if (data) {
-      console.log(data);
-    }
-    return data;
-  };
-
-  const fetchChats = async () => {
-    const res = await fetch("api/chats", {
-      method: "POST",
-      body: JSON.stringify({ userId: session.user.userData.userId }),
-    });
-    const data = await res.json();
-    if (data) {
-      const filteredChats = data.chats.filter(
-        (chat) =>
-          chat.user_one === session.user.userData.userId ||
-          chat.user_two === session.user.userData.userId
-      );
-      const chatsWithUserData = await Promise.all(
-        filteredChats.map(async (chat) => {
-          const otherUserId =
-            chat.user_one === session.user.userData.userId
-              ? chat.user_two
-              : chat.user_one;
-          console.log("otherUserId");
-          console.log(otherUserId);
-          const otherUser = await fetchUser(otherUserId);
-          console.log("otherUser");
-          console.log(otherUser.name);
-          return {
-            ...chat,
-            otherUserName: otherUser[0]?.name ?? "Unknown User",
-          };
-        })
-      );
-      setChats(chatsWithUserData);
-    }
-  };
-  const createChat = async (userTwoId: string) => {
-    const res = await fetch("api/createChat", {
+  const createChat = async (userOneId: string, userTwoId: string) => {
+    await fetch("api/createChat", {
       method: "POST",
       body: JSON.stringify({
-        userOne: session.user.userData.userId,
+        userOne: userOneId,
         userTwo: userTwoId,
       }),
     });
   };
 
-  const sendMessage = async (chatId: string, message: string) => {
-    const res = await fetch("api/sendMessage", {
+  const fetchUserWithEmail = async (email: string) => {
+    const response = await fetch("api/fetchUserWithEmail", {
       method: "POST",
       body: JSON.stringify({
-        chatId,
-        message,
-        userId: session.user.userData.userId,
+        email,
       }),
     });
+
+    if (response.ok) {
+      const data: {
+        description: string | null;
+        email: string;
+        id: string;
+        image_url: string | null;
+        name: string | null;
+      }[] = await response.json();
+
+      if(data.length > 0) {
+        return data[0];
+      }
+    }
   };
-  const fetchMessages = async (chatId: string) => {
-    const res = await fetch("api/fetchMessages", {
-      method: "POST",
-      body: JSON.stringify({
-        chatId,
-        userId: session.user.userData.userId,
-      }),
-    });
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    event.preventDefault();
+    setChatWithEmail(event.target.value);
   };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const otherUser = await fetchUserWithEmail(chatWithEmail);
+
+    if(otherUser) {
+      createChat(session?.user.userData.userId,otherUser.id);
+    }
+  };
+
   return (
     <>
-      <main>
-        <h1>Bubba</h1>
-        <>
-          <h2>{`Welcome ${session.user.name}`}</h2>
-          <section className="mt-96">
-            <h2>Contacts</h2>
-            <button onClick={fetchChats}>fetch chats</button>
-            <input
-              className="text-black"
-              type="text"
-              onChange={(e) => setUserTwoIdValue(e.target.value)}
-              value={userTwoIdValue}
-            />
-            <button onClick={() => createChat(userTwoIdValue)}>
-              {" "}
-              Create Chat{" "}
-            </button>
-            <input
-              className="text-black"
-              type="text"
-              onChange={(e) => setMessageValue(e.target.value)}
-              value={messageValue}
-            />
-            <button onClick={() => sendMessage("2", messageValue)}>
-              {" "}
-              Send Message{" "}
-            </button>
-            <button onClick={() => fetchMessages("2")}> fetch messages </button>
-          </section>
-          <section>
-            <h2>Chats</h2>
-            <div key={crypto.randomUUID()}>
-              {chats.map((chat) => {
-                console.log("chat");
-                console.log(chat);
-                return (
-                  <LinkChat
-                    key={crypto.randomUUID()}
-                    chatId={chat.id}
-                    name={chat.otherUserName}
-                    imgUrl={chat.image}
-                  />
-                );
-              })}
-            </div>
-          </section>
-        </>
-      </main>
+      <form
+        onSubmit={handleSubmit}
+        className="flex h-12 w-1/2 flex-row justify-between gap-2"
+      >
+        <input
+          type="email"
+          value={chatWithEmail}
+          onChange={handleChange}
+          className="h-full grow text-gray-500"
+          placeholder="Email.to@your.friend"
+        />
+        <button type="submit" className="h-full w-20 bg-slate-600 ">
+          Create Chat
+        </button>
+      </form>
     </>
   );
 };
