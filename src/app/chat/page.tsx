@@ -44,8 +44,8 @@ const Chat = () => {
     setChatWithEmail(event.target.value);
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleSubmit = async (event?: React.FormEvent<HTMLFormElement>) => {
+    event && event.preventDefault();
     const otherUser = await fetchUserWithEmail(chatWithEmail);
 
     if (otherUser) {
@@ -53,18 +53,11 @@ const Chat = () => {
     }
   };
 
-  useEffect(() => {
-    // Send message if enter is pressed
-    const handleKeyDown = (e) => {
-      if (e.key === "Enter") {
-        handleSubmit(e);
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [chatWithEmail]);
+  const handleKeyDown = (e:React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSubmit();
+    }
+  };
 
   return (
     <section className="flex h-screen flex-col items-center justify-center gap-3">
@@ -77,6 +70,7 @@ const Chat = () => {
           type="email"
           value={chatWithEmail}
           onChange={handleChange}
+          onKeyDown={handleKeyDown}
           className="h-full grow rounded-md bg-zinc-900 p-2 text-lg text-gray-500 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-600 focus:ring-opacity-50"
           placeholder="Email.to@your.friend"
         />

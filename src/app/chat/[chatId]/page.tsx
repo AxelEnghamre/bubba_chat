@@ -19,10 +19,17 @@ type ChatAuthorization = {
   error?: string;
 };
 
+type Message = {
+  chat_id: number;
+  id: number;
+  message: string;
+  user_id: string;
+};
+
 const Bubba = ({ params }: { params: { chatId: string } }) => {
   const { data: session } = useSession();
   const [chatRow, setChatRow] = useState<ChatRow>();
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [otherUserName, setOtherUserName] = useState<string>("");
   const [currentUserName, setCurrentUserName] = useState<string>("");
   const [messageValue, setMessageValue] = useState("");
@@ -66,9 +73,6 @@ const Bubba = ({ params }: { params: { chatId: string } }) => {
       body: JSON.stringify({ userId }),
     });
     const data = await res.json();
-    if (data) {
-      console.log(data);
-    }
     return data;
   };
 
@@ -87,9 +91,6 @@ const Bubba = ({ params }: { params: { chatId: string } }) => {
     });
 
     const data = await res.json();
-    if (data) {
-      console.log(data);
-    }
 
     setMessageValue("");
     return data;
@@ -116,7 +117,7 @@ const Bubba = ({ params }: { params: { chatId: string } }) => {
       if (error) {
         console.error("Error fetching data:", error);
       } else {
-        setMessages(data);
+        setMessages(data as Message[]);
       }
     };
 
@@ -127,8 +128,7 @@ const Bubba = ({ params }: { params: { chatId: string } }) => {
         .on(
           "postgres_changes",
           { event: "*", schema: "public", table: "messages" },
-          (payload) => {
-            console.log("Change received!", payload);
+          (/* payload */) => {
             // Update the messages state with the latest data
             fetchMessages();
           }
@@ -165,18 +165,16 @@ const Bubba = ({ params }: { params: { chatId: string } }) => {
     });
   }, [chatRow]);
 
-  useEffect(() => {
-    // Send message if enter is pressed
-    const handleKeyDown = (e) => {
-      if (e.key === "Enter") {
-        sendMessage();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [messageValue]);
+  const handleChange = (e:React.ChangeEvent<HTMLInputElement>) => {
+    setMessageValue(e.target.value);
+  }
+
+  const handleKeyDown = (e:React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      sendMessage();
+      setMessageValue("");
+    }
+  }
 
   useEffect(() => {
     // Scroll to the bottom of the messages when they update
@@ -188,10 +186,6 @@ const Bubba = ({ params }: { params: { chatId: string } }) => {
       });
     }
   }, [messages]);
-
-  console.log("messages", messages);
-  console.log("chatRow", chatRow);
-  console.log("otherUserName", otherUserName);
 
   return (
     <main className="flex h-screen w-full flex-1 flex-col  text-center">
@@ -233,7 +227,7 @@ const Bubba = ({ params }: { params: { chatId: string } }) => {
                   height={40}
                 />
                 <div className="ml-2 flex flex-col">
-                  <div className="flex flex-row items-center text-sm font-bold text-white text-zinc-100">
+                  <div className="flex flex-row items-center text-sm font-bold text-zinc-100">
                     {message.user_id === session.user.userData.userId
                       ? currentUserName
                       : otherUserName}
@@ -262,10 +256,11 @@ const Bubba = ({ params }: { params: { chatId: string } }) => {
           className="w-full rounded-md border-2 border-black px-4 py-2 text-black"
           type="text"
           value={messageValue}
-          onChange={(e) => setMessageValue(e.target.value)}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
         />
         <button
-          className="text-md ml-2 rounded-md bg-zinc-700 px-2 px-4 py-2 font-bold text-white transition duration-200 ease-in-out hover:bg-violet-500"
+          className="text-md ml-2 rounded-md bg-zinc-700 px-4 py-2 font-bold text-white transition duration-200 ease-in-out hover:bg-violet-500"
           onClick={sendMessage}
         >
           Send
