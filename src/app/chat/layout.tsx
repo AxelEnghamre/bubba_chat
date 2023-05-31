@@ -1,4 +1,5 @@
 "use client";
+import supabase from "@/lib/supabaseStore";
 import { Reorder } from "framer-motion";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
@@ -106,9 +107,56 @@ const ChatLayout = ({ children }: { children: React.ReactNode }) => {
     console.log(chats);
   }, [chats]);
 
+  const subscribeToChanges = () => {
+    const subscription = supabase
+      .channel(`chat:${session.user.userData.userId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "chats" },
+        (payload) => {
+          console.log("Change received!", payload);
+          fetchChats(session.user.userData.userId).then(async (chats) => {
+            const chatsWithUsers = await Promise.all(
+              chats.map(async (chat) => {
+                const user_data_one = await fetchUser(chat.user_one);
+                const user_data_two = await fetchUser(chat.user_two);
+
+                return {
+                  ...chat,
+                  user_data_one,
+                  user_data_two,
+                };
+              })
+            );
+            setChats(chatsWithUsers);
+          });
+        }
+      )
+      .subscribe();
+
+    return subscription;
+  };
+
+  useEffect(() => {
+    setChats((chats) => {
+      const chatsCopy = [...chats];
+      const newChats = chatsCopy.sort((a, b) => {
+        const aDate = new Date(a.created_at);
+        const bDate = new Date(b.created_at);
+        return bDate.getTime() - aDate.getTime();
+      });
+      return newChats;
+    });
+    const subscription = subscribeToChanges(); // Subscribe to changes
+
+    return () => {
+      subscription.unsubscribe(); // Unsubscribe when the component unmounts
+    };
+  }, []);
+
   return (
     <main className="grid h-screen w-screen grid-cols-6 bg-zinc-800">
-      <section className="col-span-1 col-start-1 overflow-y-hidden bg-zinc-900 pt-8">
+      <section className="col-span-1 col-start-1 overflow-y-scroll bg-zinc-900 pt-8">
         <Link href={"/chat"}>
           <h2 className="cursor-pointer text-center text-2xl font-bold tracking-wider text-rose-500 transition-colors duration-300 hover:text-rose-800">
             {" "}
@@ -131,6 +179,8 @@ const ChatLayout = ({ children }: { children: React.ReactNode }) => {
         >
           {chats.map((chat) => (
             <Reorder.Item
+              initial={{ x: -100 }}
+              animate={{ x: 0 }}
               transition={{ type: "spring", stiffness: 700, damping: 30 }}
               layout
               dragConstraints={{ top: 0, bottom: 0 }}
