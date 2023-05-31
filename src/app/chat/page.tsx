@@ -1,6 +1,6 @@
 "use client";
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const Chat = () => {
   const { data: session } = useSession();
@@ -51,10 +51,13 @@ const Chat = () => {
     if (otherUser) {
       createChat(session?.user.userData.userId, otherUser.id);
     }
+
+    setChatWithEmail("");
   };
 
-  const handleKeyDown = (e:React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
+      e.preventDefault();
       handleSubmit();
     }
   };
@@ -71,7 +74,7 @@ const Chat = () => {
           value={chatWithEmail}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
-          className="h-full grow rounded-md bg-zinc-900 p-2 text-lg text-gray-500 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-600 focus:ring-opacity-50"
+          className="h-full grow rounded-md bg-zinc-900 p-2 text-lg text-zinc-100 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-600 focus:ring-opacity-50"
           placeholder="Email.to@your.friend"
         />
         <button

@@ -165,16 +165,16 @@ const Bubba = ({ params }: { params: { chatId: string } }) => {
     });
   }, [chatRow]);
 
-  const handleChange = (e:React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMessageValue(e.target.value);
-  }
+  };
 
-  const handleKeyDown = (e:React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       sendMessage();
       setMessageValue("");
     }
-  }
+  };
 
   useEffect(() => {
     // Scroll to the bottom of the messages when they update
