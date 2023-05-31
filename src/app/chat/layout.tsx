@@ -142,8 +142,8 @@ const ChatLayout = ({ children }: { children: React.ReactNode }) => {
               <Image
                 src={
                   session.user.userData.userId !== chat.user_one
-                    ? chat.user_data_one?.image_url
-                    : chat.user_data_two?.image_url
+                    ? chat.user_data_one?.image_url ?? "next.svg"
+                    : chat.user_data_two?.image_url ?? "next.svg"
                 }
                 alt="user image"
                 width={30}
