@@ -149,8 +149,8 @@ const Bubba = ({ params }: { params: { chatId: string } }) => {
   useEffect(() => {
     fetchUser(
       chatRow?.user_one === session.user.userData.userId
-        ? chatRow?.user_two
-        : chatRow?.user_one
+        ? chatRow?.user_two ?? ""
+        : chatRow?.user_one ?? ""
     ).then((data) => {
       if (data) {
         setOtherUserName(data[0].name);
