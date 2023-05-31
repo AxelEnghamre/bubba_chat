@@ -1,6 +1,6 @@
 "use client";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const Chat = () => {
   const { data: session } = useSession();
@@ -53,6 +53,19 @@ const Chat = () => {
     }
   };
 
+  useEffect(() => {
+    // Send message if enter is pressed
+    const handleKeyDown = (e) => {
+      if (e.key === "Enter") {
+        handleSubmit(e);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [chatWithEmail]);
+
   return (
     <section className="flex h-screen flex-col items-center justify-center gap-3">
       <h1 className="text-2xl font-bold">Add a friend!👋</h1>
@@ -69,7 +82,7 @@ const Chat = () => {
         />
         <button
           type="submit"
-          className="text-md h-full rounded-md bg-rose-600 p-2 font-bold tracking-wider text-white transition-colors duration-300 hover:bg-rose-700"
+          className="text-md h-full rounded-md bg-rose-600 p-2 font-bold tracking-wider text-white transition-colors duration-300 hover:bg-rose-800"
         >
           Create Chat
         </button>

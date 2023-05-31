@@ -110,9 +110,9 @@ const ChatLayout = ({ children }: { children: React.ReactNode }) => {
     <main className="grid h-screen w-screen grid-cols-6 bg-zinc-800">
       <section className="col-span-1 col-start-1 overflow-y-hidden bg-zinc-900 pt-8">
         <Link href={"/chat"}>
-          <h2 className="cursor-pointer text-center text-2xl font-bold tracking-wider transition-colors duration-300 hover:underline">
+          <h2 className="cursor-pointer text-center text-2xl font-bold tracking-wider text-rose-500 transition-colors duration-300 hover:text-rose-800">
             {" "}
-            Chats{" "}
+            BUBBA{" "}
           </h2>
         </Link>
         <Reorder.Group
